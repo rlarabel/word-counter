@@ -1,0 +1,44 @@
+{
+  "tests": [
+    {
+      "name": "msno.txt",
+      "setup": "",
+      "run": "bash ./test/msno.test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 2
+    },
+    {
+      "name": "prime.txt",
+      "setup": "",
+      "run": "bash ./test/prime.test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 2
+    },
+    {
+      "name": "kernel.txt",
+      "setup": "",
+      "run": "bash ./test/kernel.test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 2
+    },
+    {
+      "name": "temple.txt",
+      "setup": "",
+      "run": "bash ./test/temple.test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 2
+    }
+  ]
+}
