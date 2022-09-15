@@ -18,8 +18,11 @@ WORD_T *words = NULL;
 size_t total_words = 0;
 
 void print_and_free(WORD_T*, size_t, char*);
+
 int comparator(const void *a, const void *b) {
-	return strcmp(a, b);
+	const char** aptr = (const char**) a;
+	WORD_T* bptr = (WORD_T*) b;
+	return strcmp(*aptr, bptr->word);
 }
 
 int main(int argc, char **argv) {
@@ -45,19 +48,22 @@ int main(int argc, char **argv) {
 	//       the beginning of the buffer and then fill
 	//       the buffer from that point!
 	ssize_t buf_size;
-	char buf[BUFSIZE];
-	char* temp = NULL;
+	char* buf = malloc(BUFSIZE*sizeof(char));
+	char* token = NULL;
+	size_t element_size = sizeof(WORD_T); 
+	
 	char last_word[BUFSIZE] = ""; 
 	char last_char = 0;
-	char* p = buf;
 	
 	buf_size = read(fd, buf, BUFSIZE-1);
 	buf[buf_size] = 0;
+	char *stringp = buf;
+	
 	while(buf_size > 0) {
 		char* delim = " \t\n";
 		// Case 1: buf ended up spliting a word
 		if(buf[0] !=  ' ' &&  buf[0] !=  '\t' && buf[0] !=  '\n' && last_char !=  ' ' &&  last_char !=  '\t' && last_char !=  '\n' && strlen(last_word) != 0) {
-			char* end_of_word = strsep(&p, delim); 
+			char* end_of_word = strsep(&stringp, delim); 
 			strncat(last_word, end_of_word, strlen(last_word)+strlen(end_of_word)+1);
 			
 		}
@@ -67,48 +73,59 @@ int main(int argc, char **argv) {
 	
 		
 		last_char = buf[buf_size-1];
-		if(temp == NULL) { 
-			temp = strsep(&p, delim);
+		if(token == NULL) { 
+			token = strsep(&stringp, delim);
 		} else {
-			temp = last_word;
+			token = last_word;
 		}
 		
-		while(p != NULL) {
-			if(strlen(temp) > 0 ) {
-				total_words++;
-				printf("%s\n", temp);
-			}
-			/*
-			//Use lfind to search word array for temp word
-			if(//already in words array && temp !=NULL){
-				//add to count
-
-			} else if(//not in words array && !=NULL) {
-			total_word++;
-				//realloc 
-			}
-		*/
-			temp = strsep(&p, delim);
+		//Using lfind to search word array for temp word
+		WORD_T* ptr = NULL;
+		
+		
+		while(stringp != NULL) {
 			
+			if(token != NULL && strlen(token) > 0) {				
+				if(words != NULL) 
+					ptr = lfind(&token, words, &total_words, element_size, comparator);
+					
+				if(ptr != NULL) {
+					// If found increment word count
+					ptr->count++;
+
+				} else {
+					// Realloc and incement total_words count
+					words = realloc(words, sizeof(WORD_T) * ++total_words);
+					// Inialize string to all nulls
+					//strncpy(words[total_words - 1].word, "", 42);
+					// Copy token to words array and set count
+					strncpy(words[total_words - 1].word, token, 42);
+					
+					words[total_words - 1].count = 1;
+				}
+				
+				
+				
+			}
+			token = strsep(&stringp, delim);
 		}
-		
-		//printf("%s", buf);
-		strcpy(last_word, temp);	
+
+		strcpy(last_word, token);	
 		buf_size = read(fd, buf, BUFSIZE-1);
 		buf[buf_size] = 0;
-		p = buf;
+		stringp = buf;
 		
 	}
 	
 	if(buf_size == -1) {
 		printf("Error reading file");
-	} else if(buf_size == 0) {
-		printf("Finished Reading file\n");
-		printf("%ld\n", total_words);
 	}
-	//print_and_free(words, total_words, infile);
-	// TODO: close the file
+	
+	print_and_free(words, total_words, infile);
+	
+	// TODO: close the file and free buf
 	close(fd);
+	free(buf);
 
 	return 0;
 }
