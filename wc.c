@@ -137,7 +137,7 @@ void print_and_free(WORD_T *words, size_t total_words, char *infile) {
 			printf("%s: %u\n", words[i].word, words[i].count);
 		sum += words[i].count;
 	}
-	printf("\n%d %s\n", sum, infile);
+	printf("\n%d %s\n\n", sum, infile);
 
 	free(words);
 }
