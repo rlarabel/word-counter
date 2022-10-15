@@ -8,9 +8,10 @@
 #include <unistd.h>
 
 #define BUFSIZE 1024
+#define STRSIZE 42
 
 typedef struct {
-	char word[42];
+	char word[STRSIZE];
 	unsigned count;
 } WORD_T;
 
@@ -26,27 +27,13 @@ int comparator(const void *a, const void *b) {
 }
 
 int main(int argc, char **argv) {
+	// Opening file
 	if (argc != 2) return -1;
-
 	char *infile = argv[1];
-	// TODO: open the file O_RDONLY
 	int fd = open(infile, O_RDONLY);
-	
 	if (fd == -1) return -2;
-	// TODO: repeatedly call `read()` into a buffer of
-	//       size BUFSIZE. Split the text in the buffer
-	//       on newlines and spaces. For each token:
-	//       search the `words` array to see if that
-	//       word has already been added and if so
-	//       increment the count. Otherwise add a new
-	//       WORD_T struct to the end of the array of
-	//       structs `words` and set the fields accordingly.
-
-	// TODO: its possible that a word is split between
-	//       one fill of the buffer and the next. You must
-	//       move the last word at the end of the buffer to
-	//       the beginning of the buffer and then fill
-	//       the buffer from that point!
+	
+	// Buffer
 	ssize_t buf_size;
 	char* buf = malloc(BUFSIZE*sizeof(char));
 	char* token = NULL;
@@ -59,6 +46,7 @@ int main(int argc, char **argv) {
 	buf[buf_size] = 0;
 	char *stringp = buf;
 	
+	// Read and store buffer data
 	while(buf_size > 0) {
 		char* delim = " \t\n";
 		// Case 1: buf ended up spliting a word
@@ -71,7 +59,7 @@ int main(int argc, char **argv) {
 		// Case 2: buf ended on a whitespace  
 		// Do nothing
 	
-		
+		// Moving last word to front of buffer if not first read
 		last_char = buf[buf_size-1];
 		if(token == NULL) { 
 			token = strsep(&stringp, delim);
@@ -79,14 +67,13 @@ int main(int argc, char **argv) {
 			token = last_word;
 		}
 		
-		//Using lfind to search word array for temp word
 		WORD_T* ptr = NULL;
-		
 		
 		while(stringp != NULL) {
 			
 			if(token != NULL && strlen(token) > 0) {				
 				if(words != NULL) 
+					// Look for word in struct array
 					ptr = lfind(&token, words, &total_words, element_size, comparator);
 					
 				if(ptr != NULL) {
@@ -96,11 +83,8 @@ int main(int argc, char **argv) {
 				} else {
 					// Realloc and incement total_words count
 					words = realloc(words, sizeof(WORD_T) * ++total_words);
-					// Inialize string to all nulls
-					//strncpy(words[total_words - 1].word, "", 42);
-					// Copy token to words array and set count
-					strncpy(words[total_words - 1].word, token, 42);
-					
+					// Make new word in struct array;
+					strncpy(words[total_words - 1].word, token, STRSIZE);
 					words[total_words - 1].count = 1;
 				}
 				
@@ -123,7 +107,6 @@ int main(int argc, char **argv) {
 	
 	print_and_free(words, total_words, infile);
 	
-	// TODO: close the file and free buf
 	close(fd);
 	free(buf);
 
